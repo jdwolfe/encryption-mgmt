@@ -1,0 +1,16 @@
+{
+    "name": "sonnet/skms",
+    "description": "Sonnet Key Management System",
+    "type": "project",
+    "version": "3.0",
+    "require": {
+    },
+    "require-dev": {
+    },
+    "authors": [
+        {
+            "name": "Palinode",
+            "email": "support@palinode.io"
+        }
+    ]
+}
