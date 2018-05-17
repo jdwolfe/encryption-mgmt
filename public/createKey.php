@@ -2,6 +2,8 @@
 
 require( __DIR__ . '/../app/SkmsClass.php');
 
-$skms = new SkmsController;
-$keyId = $skms->createKey();
+$request = $_POST;
+
+$skms = new SkmsClass;
+$keyId = $skms->createKey( $request );
 echo '{"keyId": "' . $keyId . '"}';

@@ -5,8 +5,8 @@
 * comment: written for PHP 7
 *	   if the KeyId is not in the DB it will call to the version 2 server
 */
-require( __DIR__ . '../config.php' );
-require( __DIR__ . '../skmsdb.php' );
+require( __DIR__ . '/../config.php' );
+require( __DIR__ . '/../skmsdb.php' );
 date_default_timezone_set('America/Chicago');
 
 class SkmsClass {
@@ -154,9 +154,14 @@ class SkmsClass {
 	/*
 	* Create the KeyId, checks for a unique KeyId, then create a random string to be used as the key
 	*/
-	public function createKey() {
+	public function createKey($request) {
 
 		$db = new SkmsDb();
+
+		$company_id = intval( $request['company_id'] );
+		if( 0 == $company_id ) {
+			return NULL;
+		}
 
 		$keyId_created = FALSE;
 		while( !$keyId_created ) {
@@ -173,7 +178,7 @@ class SkmsClass {
 		$key = openssl_random_pseudo_bytes( 32 );
 		$key_64 = base64_encode( $key  );
 
-		$insert = "INSERT INTO keyids (keyid, keyvalue) VALUES( '" . $keyId . "', '" . $key_64 . "' )";
+		$insert = "INSERT INTO keyids (keyid, keyvalue, company_id) VALUES( '" . $keyId . "', '" . $key_64 . "', " . $company_id . ")";
 		$db->exec( $insert );
 		$db->close();
 		return $keyId;
