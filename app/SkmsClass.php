@@ -5,14 +5,9 @@
 * comment: written for PHP 7
 *	   if the KeyId is not in the DB it will call to the version 2 server
 */
+require( __DIR__ . '../config.php' );
+require( __DIR__ . '../skmsdb.php' );
 date_default_timezone_set('America/Chicago');
-
-class SkmsDb extends SQLite3 {
-	function __construct() {
-		$this->open('/sonnet/encryption/skms/skms3.db');
-	}
-}
-
 
 class SkmsClass {
 
