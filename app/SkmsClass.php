@@ -57,23 +57,6 @@ class SkmsClass {
 		die('Can not make new key');
 	}
 
-	/*
-	* Make a new random key
-	*/
-	public function createKey( $KeyId = '' ) {
-		// make a new key
-		$strong = NULL;
-		$key = openssl_random_pseudo_bytes(32, $strong);
-		$key_64 = base64_encode( $key  );
-
-		$db = new SkmsDb();
-		$insert = "INSERT INTO keyids (keyid, keyvalue) VALUES( '" . $KeyId . "', '" . $key_64 . "' )";
-		$db->exec( $insert );
-
-		$db->close();
-		return $key_64;
-	}
-
 	public function encryptLocal ( $key = '', $text = '' ) {
 
 		$key = base64_decode( $key );
@@ -173,4 +156,28 @@ class SkmsClass {
 		fclose( $f );
 	}
 
+	public function createKey() {
+
+		$db = new SkmsDb();
+
+		$keyId_created = FALSE;
+		while( !$keyId_created ) {
+			$rand = bin2hex( openssl_random_pseudo_bytes( 16 ) );
+			$keyId = substr( $rand, 0, 8 ) . '-' . substr( $rand, 8, 4 ) . '-' . substr( $rand, 12, 4 ) . '-' . substr( $rand, 16, 4 ) . '-' . substr( $rand, 20, 12 );
+			$query = "SELECT keyid FROM keyids WHERE keyid='" . $keyId . "'";
+			$res = $db->query( $query );
+			$row = $res->fetchArray(SQLITE3_ASSOC);
+			if( FALSE === $row ) {
+				$keyId_created = TRUE;
+			}
+		}
+
+		$key = openssl_random_pseudo_bytes( 32 );
+		$key_64 = base64_encode( $key  );
+
+		$insert = "INSERT INTO keyids (keyid, keyvalue) VALUES( '" . $keyId . "', '" . $key_64 . "' )";
+		$db->exec( $insert );
+		$db->close();
+		return $keyId;
+	}
 }
