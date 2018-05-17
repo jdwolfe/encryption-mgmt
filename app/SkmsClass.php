@@ -156,6 +156,9 @@ class SkmsClass {
 		fclose( $f );
 	}
 
+	/*
+	* Create the KeyId, checks for a unique KeyId, then create a random string to be used as the key
+	*/
 	public function createKey() {
 
 		$db = new SkmsDb();
