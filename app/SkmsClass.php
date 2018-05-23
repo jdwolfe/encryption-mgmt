@@ -183,4 +183,57 @@ class SkmsClass {
 		$db->close();
 		return $keyId;
 	}
+
+	public function encryptDataRemote( $data = array() ) {
+echo ENVIRONMENT;
+
+		if ( 'PRODUCTION' == ENVIRONMENT ) {
+			$skms_url = 'https://noon.palinode.io/skms';
+		} else {
+			$skms_url = 'https://dev.palinode.io/skms';
+		}
+
+		$encrypt_url = $skms_url . '/encrypt.php';
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_URL, $encrypt_url );
+		curl_setopt( $ch, CURLOPT_POST, TRUE );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, TRUE );
+		$result = curl_exec( $ch );
+		$info = curl_getinfo( $ch );
+		curl_close( $ch );
+		if( 200 != $info['http_code'] ) {
+			return NULL;
+		}
+
+		$encrypted = json_decode( $result );
+		return $encrypted;
+
+	}
+
+	public function decryptDataRemote( $data = array() ) {
+		if ( 'PRODUCTION' == ENVIRONMENT ) {
+			$skms_url = 'https://noon.palinode.io/skms';
+		} else {
+			$skms_url = 'https://dev.palinode.io/skms';
+		}
+
+		$decrypt_url = $skms_url . '/decrypt.php';
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_URL, $decrypt_url );
+		curl_setopt( $ch, CURLOPT_POST, TRUE );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, TRUE );
+		$result = curl_exec( $ch );
+		$info = curl_getinfo( $ch );
+		curl_close( $ch );
+		if( 200 != $info['http_code'] ) {
+			return NULL;
+		}
+
+		$decrypted = json_decode( $result );
+		return $decrypted;
+
+	}
+
 }
