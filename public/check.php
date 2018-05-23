@@ -7,7 +7,11 @@ $KeyId = isset( $_POST['KeyId'] ) ? $_POST['KeyId'] : '';
 if( '' != $KeyId ) {
 	$skms = new SkmsClass;
 	$return = $skms->checkKeyId( $KeyId );
-	echo '{"key": "' . $return . '"}';
+	if( $return ) {
+		echo '{"KeyCheck": true}';
+	} else {
+		echo '{"KeyCheck": false}';
+	}
 } else {
-	echo '{}';
+	echo '{"KeyCheck": false}';
 }

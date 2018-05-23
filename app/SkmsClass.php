@@ -16,6 +16,7 @@ class SkmsClass {
 	private function checkData( $data ) {
 
 		if( !isset( $data['KeyId'] ) ) {
+			return NULL;
 			echo json_encode( array() );
 			die();
 		}
@@ -236,4 +237,28 @@ echo ENVIRONMENT;
 
 	}
 
+	/*
+	* Function to check the KeyId
+	*/
+	public function checkKeyId( $KeyId = '' ) {
+
+		//check format of $KeyId
+		preg_match( '/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/', $KeyId, $matches );
+		if( '' == $KeyId || count( $matches ) == 0 ) { 
+			$this->SkmsLog( $KeyId . ',Invalid KeyId format' );
+			return FALSE;
+		}
+
+		$key = $this->getKey( $KeyId );
+		if( NULL === $key ) {
+			$this->SkmsLog( $KeyId . ',Unknown KeyId' );
+			return FALSE;
+		}
+
+		$this->SkmsLog( $KeyId . ',KeyId exists' );
+		return TRUE;
+
+	}
+
 }
+
