@@ -96,22 +96,27 @@ class SkmsClass {
 		$data = $request;
 		$data = $this->checkData( $data );
 
+		$encrypted = array();
+
 		$key = $this->getKey( $this->KeyId );
 		if( NULL === $key ) {
-		// it uses the v2 encryption
-			
-
+			// it uses the v2 encryption
+			$this->SkmsLog( 'Going remote' );
+			$data['KeyId'] = $this->KeyId;
+			$remote_data = $this->encryptDataRemote( $data );
+			foreach( $remote_data as $field => $value ) {
+				$encrypted[$field] = $value;
+			}
 		} else {
 
-		$encrypted = array();
-		foreach( $data as $field => $value ) {
-			$value = trim( $value );
-			if( '' == $value ) {
-				$encrypted[$field] = NULL;
-			} else {
-				$encrypted[$field] = $this->encryptLocal( $key, $value );
+			foreach( $data as $field => $value ) {
+				$value = trim( $value );
+				if( '' == $value ) {
+					$encrypted[$field] = NULL;
+				} else {
+					$encrypted[$field] = $this->encryptLocal( $key, $value );
+				}
 			}
-		}
 
 		} // if key is NULL
 
@@ -133,9 +138,22 @@ class SkmsClass {
 		$key = $this->getKey( $this->KeyId );
 
 		$plaintext = array();
-		foreach( $data as $field => $value ) {
-			$plaintext[$field] = $this->decryptLocal( $key, $value );
-		}
+
+		if( NULL === $key ) {
+			// it uses the v2 encryption
+			$this->SkmsLog( 'Going remote' );
+			$data['KeyId'] = $this->KeyId;
+			$remote_data = $this->decryptDataRemote( $data );
+			foreach( $remote_data as $field => $value ) {
+				$plaintext[$field] = $value;
+			}
+		} else {
+
+			foreach( $data as $field => $value ) {
+				$plaintext[$field] = $this->decryptLocal( $key, $value );
+			}
+
+		} // end if key is NULL
 
 		$end = microtime(1);
 		$plaintext['total_time'] = $end - $start;
@@ -186,7 +204,6 @@ class SkmsClass {
 	}
 
 	public function encryptDataRemote( $data = array() ) {
-echo ENVIRONMENT;
 
 		if ( 'PRODUCTION' == ENVIRONMENT ) {
 			$skms_url = 'https://noon.palinode.io/skms';
@@ -200,6 +217,7 @@ echo ENVIRONMENT;
 		curl_setopt( $ch, CURLOPT_POST, TRUE );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, TRUE );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, FALSE );
 		$result = curl_exec( $ch );
 		$info = curl_getinfo( $ch );
 		curl_close( $ch );
@@ -225,6 +243,7 @@ echo ENVIRONMENT;
 		curl_setopt( $ch, CURLOPT_POST, TRUE );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, TRUE );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, FALSE );
 		$result = curl_exec( $ch );
 		$info = curl_getinfo( $ch );
 		curl_close( $ch );
