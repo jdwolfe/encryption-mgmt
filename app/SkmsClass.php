@@ -109,7 +109,7 @@ class SkmsClass {
 
 			foreach( $data as $field => $value ) {
 				$value = trim( $value );
-				if( '' == $value ) {
+				if( '' == $value || NULL === $value ) {
 					$encrypted[$field] = NULL;
 				} else {
 					$encrypted[$field] = $this->encryptLocal( $key, $value );
@@ -146,7 +146,11 @@ class SkmsClass {
 		} else {
 
 			foreach( $data as $field => $value ) {
-				$plaintext[$field] = $this->decryptLocal( $key, $value );
+				if( '' == $value || NULL === $value ) {
+					$plaintext[$field] = NULL;
+				} else {
+					$plaintext[$field] = $this->decryptLocal( $key, $value );
+				}
 			}
 
 		} // end if key is NULL
