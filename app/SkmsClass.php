@@ -100,18 +100,16 @@ class SkmsClass {
 
 		$key = $this->getKey( $this->KeyId );
 		if( NULL === $key ) {
-			// it uses the v2 encryption
-			$this->SkmsLog( 'Going remote' );
-			$data['KeyId'] = $this->KeyId;
-			$remote_data = $this->encryptDataRemote( $data );
-			foreach( $remote_data as $field => $value ) {
-				$encrypted[$field] = $value;
+			// KeyID is not recognized. Send back blank data.
+			$this->SkmsLog( 'KeyID Not Recongized. ' .  $this->KeyId );
+			foreach( $data as $field => $value ) {
+				$encrypted[$field] = NULL;
 			}
 		} else {
 
 			foreach( $data as $field => $value ) {
 				$value = trim( $value );
-				if( '' == $value ) {
+				if( '' == $value || NULL === $value ) {
 					$encrypted[$field] = NULL;
 				} else {
 					$encrypted[$field] = $this->encryptLocal( $key, $value );
@@ -140,17 +138,19 @@ class SkmsClass {
 		$plaintext = array();
 
 		if( NULL === $key ) {
-			// it uses the v2 encryption
-			$this->SkmsLog( 'Going remote' );
-			$data['KeyId'] = $this->KeyId;
-			$remote_data = $this->decryptDataRemote( $data );
-			foreach( $remote_data as $field => $value ) {
-				$plaintext[$field] = $value;
+			// KeyID is not recognized. Send back blank data.
+			$this->SkmsLog( 'KeyID Not Recongized. ' .  $this->KeyId );
+			foreach( $data as $field => $value ) {
+				$plaintext[$field] = NULL;
 			}
 		} else {
 
 			foreach( $data as $field => $value ) {
-				$plaintext[$field] = $this->decryptLocal( $key, $value );
+				if( '' == $value || NULL === $value ) {
+					$plaintext[$field] = NULL;
+				} else {
+					$plaintext[$field] = $this->decryptLocal( $key, $value );
+				}
 			}
 
 		} // end if key is NULL
@@ -201,59 +201,6 @@ class SkmsClass {
 		$db->exec( $insert );
 		$db->close();
 		return $keyId;
-	}
-
-	public function encryptDataRemote( $data = array() ) {
-
-		if ( 'PRODUCTION' == ENVIRONMENT ) {
-			$skms_url = 'https://noon.palinode.io/skms';
-		} else {
-			$skms_url = 'https://dev.palinode.io/skms';
-		}
-
-		$encrypt_url = $skms_url . '/encrypt.php';
-		$ch = curl_init();
-		curl_setopt( $ch, CURLOPT_URL, $encrypt_url );
-		curl_setopt( $ch, CURLOPT_POST, TRUE );
-		curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, TRUE );
-		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, FALSE );
-		$result = curl_exec( $ch );
-		$info = curl_getinfo( $ch );
-		curl_close( $ch );
-		if( 200 != $info['http_code'] ) {
-			return NULL;
-		}
-
-		$encrypted = json_decode( $result );
-		return $encrypted;
-
-	}
-
-	public function decryptDataRemote( $data = array() ) {
-		if ( 'PRODUCTION' == ENVIRONMENT ) {
-			$skms_url = 'https://noon.palinode.io/skms';
-		} else {
-			$skms_url = 'https://dev.palinode.io/skms';
-		}
-
-		$decrypt_url = $skms_url . '/decrypt.php';
-		$ch = curl_init();
-		curl_setopt( $ch, CURLOPT_URL, $decrypt_url );
-		curl_setopt( $ch, CURLOPT_POST, TRUE );
-		curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, TRUE );
-		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, FALSE );
-		$result = curl_exec( $ch );
-		$info = curl_getinfo( $ch );
-		curl_close( $ch );
-		if( 200 != $info['http_code'] ) {
-			return NULL;
-		}
-
-		$decrypted = json_decode( $result );
-		return $decrypted;
-
 	}
 
 	/*
