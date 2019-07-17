@@ -1,8 +1,8 @@
-# SKMS #
+# KMS #
 
-## Version 3 ##
+## Version 1 ##
 
-Sonnet Key Management System (SKMS).
+Key Management System (KMS).
 * Creates keys for new customers and key rotation.
 * Stores the encrypted key locally
 * Quick encrypt and decrypt functions.

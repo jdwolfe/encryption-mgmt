@@ -1,9 +1,9 @@
 <?php
 
-require( __DIR__ . '/../app/SkmsClass.php');
+require( __DIR__ . '/../app/KmsClass.php');
 
 $request = $_POST;
 
-$skms = new SkmsClass;
-$skms->Encrypt( $request );
+$kms = new KmsClass;
+$kms->Encrypt( $request );
 

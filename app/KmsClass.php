@@ -1,15 +1,15 @@
 <?php
 /*
-* Encryption/Decryption module for Sonnet
-* version: 3
+* Encryption/Decryption
+* version: 1
 * comment: written for PHP 7
 *	   if the KeyId is not in the DB it will call to the version 2 server
 */
 require( __DIR__ . '/../config.php' );
-require( __DIR__ . '/../skmsdb.php' );
+require( __DIR__ . '/../kmsdb.php' );
 date_default_timezone_set('America/Chicago');
 
-class SkmsClass {
+class KmsClass {
 
 	private $KeyId = NULL;
 
@@ -26,7 +26,7 @@ class SkmsClass {
 		//check format of $KeyId
 		preg_match( '/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/', $this->KeyId, $matches );
 		if( '' == $this->KeyId || count( $matches ) == 0 ) { 
-			$this->SkmsLog( $this->KeyId . ',invalid key' );
+			$this->KmsLog( $this->KeyId . ',invalid key' );
 			echo json_encode( array() );
 			die();
 		}
@@ -37,7 +37,7 @@ class SkmsClass {
 
 	public function getKey( $KeyId = '' ) {
 
-		$db = new SkmsDb();
+		$db = new KmsDb();
 
 		$sql = "SELECT keyvalue FROM keyids WHERE keyid = '" . $KeyId . "'";
 		$res = $db->query( $sql );
@@ -101,7 +101,7 @@ class SkmsClass {
 		$key = $this->getKey( $this->KeyId );
 		if( NULL === $key ) {
 			// KeyID is not recognized. Send back blank data.
-			$this->SkmsLog( 'KeyID Not Recongized. ' .  $this->KeyId );
+			$this->KmsLog( 'KeyID Not Recongized. ' .  $this->KeyId );
 			foreach( $data as $field => $value ) {
 				$encrypted[$field] = NULL;
 			}
@@ -120,7 +120,7 @@ class SkmsClass {
 
 		$end = microtime(1);
 		$encrypted['total_time'] = $end - $start;
-		$this->SkmsLog( $this->KeyId . ',' . $encrypted['total_time'] );
+		$this->KmsLog( $this->KeyId . ',' . $encrypted['total_time'] );
 		echo json_encode( $encrypted );
 
 		die();
@@ -139,7 +139,7 @@ class SkmsClass {
 
 		if( NULL === $key ) {
 			// KeyID is not recognized. Send back blank data.
-			$this->SkmsLog( 'KeyID Not Recongized. ' .  $this->KeyId );
+			$this->KmsLog( 'KeyID Not Recongized. ' .  $this->KeyId );
 			foreach( $data as $field => $value ) {
 				$plaintext[$field] = NULL;
 			}
@@ -157,15 +157,15 @@ class SkmsClass {
 
 		$end = microtime(1);
 		$plaintext['total_time'] = $end - $start;
-		$this->SkmsLog( $this->KeyId . ',' . $plaintext['total_time'] );
+		$this->KmsLog( $this->KeyId . ',' . $plaintext['total_time'] );
 		echo json_encode( $plaintext );
 
 		die();
 
 	}
 
-	private function SkmsLog( $s = '' ) {
-		$f = fopen( '/sonnet/encryption/skms/logs/skms.' . date('Ymd') . '.log', 'a' );
+	private function KmsLog( $s = '' ) {
+		$f = fopen( './../logs/kms.' . date('Ymd') . '.log', 'a' );
 		fwrite( $f, date('Y-m-d H:i:s') . ' ' . $s . "\n" );
 		fclose( $f );
 	}
@@ -175,7 +175,7 @@ class SkmsClass {
 	*/
 	public function createKey($request) {
 
-		$db = new SkmsDb();
+		$db = new KmsDb();
 
 		$company_id = intval( $request['company_id'] );
 		if( 0 == $company_id ) {
@@ -211,17 +211,17 @@ class SkmsClass {
 		//check format of $KeyId
 		preg_match( '/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/', $KeyId, $matches );
 		if( '' == $KeyId || count( $matches ) == 0 ) { 
-			$this->SkmsLog( $KeyId . ',Invalid KeyId format' );
+			$this->KmsLog( $KeyId . ',Invalid KeyId format' );
 			return FALSE;
 		}
 
 		$key = $this->getKey( $KeyId );
 		if( NULL === $key ) {
-			$this->SkmsLog( $KeyId . ',Unknown KeyId' );
+			$this->KmsLog( $KeyId . ',Unknown KeyId' );
 			return FALSE;
 		}
 
-		$this->SkmsLog( $KeyId . ',KeyId exists' );
+		$this->KmsLog( $KeyId . ',KeyId exists' );
 		return TRUE;
 
 	}

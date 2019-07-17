@@ -1,9 +1,9 @@
 <?php
 
-require( __DIR__ . '/../app/SkmsClass.php');
+require( __DIR__ . '/../app/KmsClass.php');
 
 $request = $_POST;
 
-$skms = new SkmsClass;
-$keyId = $skms->createKey( $request );
+$kms = new KmsClass;
+$keyId = $kms->createKey( $request );
 echo '{"keyId": "' . $keyId . '"}';
